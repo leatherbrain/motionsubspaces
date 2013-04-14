@@ -1,0 +1,133 @@
+#*****************************************************************************
+# FILE:				Makefile
+# DESCRIPTION:			Makefile for slammer library and tests.
+# 
+# REVISION HISTORY:		AUTHOR:		Sudeep S.
+# 						DATE:		03 Nov 2010
+# 						COMMENTS:	File created.
+#*****************************************************************************/
+
+OBJDIR = ./../lib/
+TSTDIR = ./../tst/
+
+CXX = colorgcc
+CXX_GPP34 = g++34
+
+FLAGS_REL_PASS_1 = -O3 -pipe -Wall -W -fprofile-arcs -D_FILE_OFFSET_BITS=64 -msse -finline-functions -ffast-math -fPIC
+FLAGS_REL_PASS_2 = -O3 -pipe -Wall -W -freorder-functions -fbranch-probabilities -D_FILE_OFFSET_BITS=64 -msse -finline-functions -ffast-math -fPIC
+FLAGS_REL_TST = -O3 -pipe -Wall -W -D_FILE_OFFSET_BITS=64 -msse -finline-functions -ffast-math
+
+FLAGS_DEBUG = -g -DDEBUG -D_FILE_OFFSET_BITS=64 -Wall -W -fPIC
+FLAGS_DEBUG_TST = -g -DDEBUG -D_FILE_OFFSET_BITS=64
+
+#**********************************************************
+# SET DEBUG / RELEASE MODES HERE
+#**********************************************************
+#
+FLAGS_1 = $(FLAGS_REL_PASS_1)
+FLAGS_2 = $(FLAGS_REL_PASS_2)
+FLAGS_TST = $(FLAGS_REL_TST)
+#
+# UNCOMMENT THE FOLLOWING LINES FOR DEBUG MODE
+#
+#FLAGS_1 = $(FLAGS_DEBUG)
+#FLAGS_2 = $(FLAGS_DEBUG)
+#FLAGS_TST = $(FLAGS_DEBUG_TST)
+#
+#**********************************************************
+
+INCLUDES = -I../inc \
+	-I../../common \
+	-I../../vslam/src \
+	-I/usr/local \
+	-I/usr/local/include \
+	-I/usr/local/include/include \
+	-I/usr/local/cvd/include \
+	-I/usr/local/opencv/include \
+	-I/usr/local/TooN/include \
+	-I/usr/local/gvars3/include \
+	-I/usr/local/tag/include \
+	-I/usr/share/qt4/mkspecs/linux-g++ \
+	-I/usr/local/boost-1.43.0/include \
+	-I/usr/local/boost-1.43.0/include/boost-numeric-bindings \
+	-I/usr/local/include/CameraGeometry \
+	-I/usr/local/include/ChiSquareDistribution \
+	-I/usr/local/include/common \
+	-I/usr/local/include/Config \
+	-I/usr/local/include/descriptors \
+	-I/usr/local/include/descriptors/MultiResolutionDescriptor/src \
+	-I/usr/local/include/descriptors/MultiResolutionDescriptor/CDLib \
+	-I/usr/local/include/descriptors/sah \
+	-I/usr/local/include/GeodeticGeometry \
+	-I/usr/local/include/ImageProcessing \
+	-I/usr/local/include/Math \
+	-I/usr/local/include/Math/MathUtils \
+	-I/usr/local/include/Math/OldMathLib \
+	-I/usr/local/include/Math/SmallMathLib \
+	-I/usr/local/include/PoseEstimation \
+	-I/usr/local/include/Profiler/Shiny/include \
+	-I/usr/local/include/random \
+	-I/usr/local/include/ransac/include \
+	-I/usr/local/include/serialization \
+	-I/usr/local/include/slam-system/src \
+	-I/usr/local/include/StochasticFilters \
+	-I/usr/local/include/StochasticFilters/OldParticleFilters \
+	-I/usr/local/include/StochasticFilters/OldKalmanFilters \
+	-I/usr/local/include/VideoSource/src
+		
+LIBPATHS = -L../lib \
+	-L../../vslam \
+	-L/usr/local/lib \
+	-L/usr/local/cvd/lib \
+	-L/usr/lib \
+	-L/usr/local/boost/lib
+			
+LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video -lBtlSlamSystem \
+	-lBtlMultiResDescriptor -lBtlImgProc -lBtlRansac -lBtlOldKalmanFilters \
+	-lBtlPoseEstimation -lBtlConfig -lBtlGeneralFilter -lBtlChiSquareDistribution \
+	-lBtlRandom -lBtlCameraGeometry -lBtlVideoSource -lBtlShinyProfiler \
+	-lBtlSahDescriptor -lBtlMathUtils -lBtlSmallMathLib -lBtlOldMathLib \
+	-llapack -lboost_program_options -lboost_serialization -lboost_signals \
+	-lboost_thread -lglfw -lGL -lX11 -lXrandr -lGLU -lboost_date_time -ldc1394 \
+	-lraw1394 -lvslam -lbgsub
+
+OBJS = $(OBJDIR)fast-edge.o 
+		
+TARGET = $(OBJDIR)libbgsub
+
+all: lib tst
+
+$(OBJDIR)fast-edge.o: fast-edge.c ../inc/fast-edge.h
+	$(CXX) $(FLAGS_1) -c fast-edge.c $(INCLUDES) -o $(OBJDIR)fast-edge.o
+	$(CXX) $(FLAGS_2) -c fast-edge.c $(INCLUDES) -o $(OBJDIR)fast-edge.o
+
+lib: $(OBJS)
+	rm -f $(TARGET).so*
+	ar rcv $(TARGET).a $(OBJS)
+	ranlib $(TARGET).a
+	cp $(TARGET).a $(TARGET).so.1.0.0
+	ln -s $(TARGET).so.1.0.0 $(TARGET).so.1.0
+	ln -s $(TARGET).so.1.0.0 $(TARGET).so.1
+	ln -s $(TARGET).so.1.0.0 $(TARGET).so
+	
+tst: TestOptFlow TestProjection TestBgSub
+
+TestOptFlow: $(TSTDIR)TestOptFlow.cpp ../inc/OptFlow.h
+	$(CXX) $(FLAGS_TST) -c $(TSTDIR)TestOptFlow.cpp $(INCLUDES) -o $(OBJDIR)TestOptFlow.o
+	$(CXX) $(OBJDIR)TestOptFlow.o $(LIBPATHS) $(LIBS) -o $(OBJDIR)OptFlow
+
+TestProjection: $(TSTDIR)TestProjection.cpp ../inc/Projection.h
+	$(CXX) $(FLAGS_TST) -c $(TSTDIR)TestProjection.cpp $(INCLUDES) -o $(OBJDIR)TestProjection.o
+	$(CXX) $(OBJDIR)TestProjection.o $(LIBPATHS) $(LIBS) -o $(OBJDIR)Projection
+
+TestBgSub: $(TSTDIR)TestBgSub.cpp ../inc/BgSub.h ../inc/OptFlow.h ../inc/Projection.h
+	$(CXX) $(FLAGS_TST) -c $(TSTDIR)TestBgSub.cpp $(INCLUDES) -o $(OBJDIR)TestBgSub.o
+	$(CXX) $(OBJDIR)TestBgSub.o $(LIBPATHS) $(LIBS) -o $(OBJDIR)BgSub
+
+Visualise: $(TSTDIR)Visualise.cpp ../inc/BgSub.h ../inc/OptFlow.h ../inc/Projection.h
+	$(CXX) $(FLAGS_TST) -c $(TSTDIR)Visualise.cpp $(INCLUDES) -o $(OBJDIR)Visualise.o
+	$(CXX) $(OBJDIR)Visualise.o $(LIBPATHS) $(LIBS) -o $(OBJDIR)Visualise
+
+clean:
+	rm -f $(OBJDIR)*.o $(OBJDIR)*.gcno $(TSTDIR)*.o $(TARGET)
+

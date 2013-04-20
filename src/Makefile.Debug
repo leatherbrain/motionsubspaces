@@ -82,23 +82,22 @@ LIBPATHS = -L../lib/Debug \
 	-L/usr/lib \
 	-L/usr/local/boost/lib
 
-LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video -lBtlSlamSystem \
-	-lBtlMultiResDescriptor -lBtlImgProc -lBtlRansac -lBtlOldKalmanFilters \
-	-lBtlPoseEstimation -lBtlConfig -lBtlGeneralFilter -lBtlChiSquareDistribution \
-	-lBtlRandom -lBtlCameraGeometry -lBtlVideoSource -lBtlShinyProfiler \
-	-lBtlSahDescriptor -lBtlMathUtils -lBtlSmallMathLib -lBtlOldMathLib \
-	-llapack -lboost_program_options -lboost_serialization -lboost_signals \
-	-lboost_thread -lglfw -lGL -lX11 -lXrandr -lGLU -lboost_date_time -ldc1394 \
-	-lraw1394 -lvslam_d -lbgsub_d
+LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video 
 
-OBJS = $(OBJDIR)fast-edge.o 
+OBJS = $(OBJDIR)Tracker.o \
+	$(OBJDIR)Subspace.o 
 		
-TARGET = $(OBJDIR)libbgsub_d
+TARGET = $(OBJDIR)libsubspaces_d
 
 all: lib tst
 
-$(OBJDIR)fast-edge.o: fast-edge.c ../inc/fast-edge.h
-	$(CXX) $(FLAGS_DEBUG) -c fast-edge.c $(INCLUDES) -o $(OBJDIR)fast-edge.o
+$(OBJDIR)Tracker.o: Tracker.cpp ../inc/Tracker.h
+	$(CXX) $(FLAGS_1) -c Tracker.cpp $(INCLUDES) -o $(OBJDIR)Tracker.o
+	$(CXX) $(FLAGS_2) -c Tracker.cpp $(INCLUDES) -o $(OBJDIR)Tracker.o
+
+$(OBJDIR)Subspace.o: Subspace.cpp ../inc/Subspace.h
+	$(CXX) $(FLAGS_1) -c Subspace.cpp $(INCLUDES) -o $(OBJDIR)Subspace.o
+	$(CXX) $(FLAGS_2) -c Subspace.cpp $(INCLUDES) -o $(OBJDIR)Subspace.o
 
 lib: $(OBJS)
 	rm -f $(TARGET).so*
@@ -109,19 +108,7 @@ lib: $(OBJS)
 	ln -s $(TARGET).so.1.0.0 $(TARGET).so.1
 	ln -s $(TARGET).so.1.0.0 $(TARGET).so
 	
-tst: TestOptFlow TestProjection TestBgSub
-
-TestOptFlow: $(TSTDIR)TestOptFlow.cpp ../inc/OptFlow.h
-	$(CXX) $(FLAGS_TST) -c $(TSTDIR)TestOptFlow.cpp $(INCLUDES) -o $(OBJDIR)TestOptFlow.o
-	$(CXX) $(OBJDIR)TestOptFlow.o $(LIBPATHS) $(LIBS) -o $(OBJDIR)OptFlow
-
-TestProjection: $(TSTDIR)TestProjection.cpp ../inc/Projection.h
-	$(CXX) $(FLAGS_TST) -c $(TSTDIR)TestProjection.cpp $(INCLUDES) -o $(OBJDIR)TestProjection.o
-	$(CXX) $(OBJDIR)TestProjection.o $(LIBPATHS) $(LIBS) -o $(OBJDIR)Projection
-
-TestBgSub: $(TSTDIR)TestBgSub.cpp ../inc/BgSub.h ../inc/OptFlow.h ../inc/Projection.h
-	$(CXX) $(FLAGS_TST) -c $(TSTDIR)TestBgSub.cpp $(INCLUDES) -o $(OBJDIR)TestBgSub.o
-	$(CXX) $(OBJDIR)TestBgSub.o $(LIBPATHS) $(LIBS) -o $(OBJDIR)BgSub
+tst: 
 
 clean:
 	rm -f $(OBJDIR)*.o $(OBJDIR)*.gcno $(TSTDIR)*.o $(TARGET) $(OBJDIR)*.so*

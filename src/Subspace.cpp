@@ -13,11 +13,12 @@
 #include <TooN/TooN.h>
 #include <TooN/LU.h>
 #include <TooN/SymEigen.h>
+#include <set>
 
 //=============================================================================
 /// Standard constructor
 //=============================================================================
-Subspace::Subspace(void)
+Subspace::Subspace(void) : proj(NULL), charvec(NULL)
 {}
 
 //=============================================================================
@@ -39,26 +40,30 @@ void Subspace::Extract(const cv::Mat &trjs)
 	for (int iter = 0; iter < NUM_RANSAC_ITERATIONS; iter++)
 	{
 		// Pick three basis trajectories at random
-		std::set<int, bool> unique;
+		std::set<int> unique;
 		while (unique.size() < 3)
 			unique.insert(rand() % P);
 
 		// Create basis trajectory matrix
 		TooN::Matrix<-1, -1, double> W3(2 * F, 3);
-		for (int c = 0; c < 3; c++)
-		{
-			const int tidx = unique[c].first;
+		std::set<int>::const_iterator p = unique.begin();
+		for (int c = 0; p != unique.end(); p++, c++)
 			for (int r = 0; r < trjs.rows; r++)
-				W3(r, c) = trjs.at<double>(r, tidx);
-		}
+				W3(r, c) = trjs.at<double>(r, *p);
 
 		// Compute the projection matrix corresponding to these trajectories
-		TooN::LU<> lu(W3->T() * W3);
-		proj = W3 * lu.get_inverse() * W3->T();
+		TooN::LU<> lu(W3.T() * W3);
+		if (proj)
+			delete proj;
+		proj = new TooN::Matrix<-1, -1, double>(2 * F, 2 * F);
+		*proj = W3 * lu.get_inverse() * W3.T();
 
 		// Compute eigenvector of the projection matrix as the characteristic
 		// trajectory
-		TooN::SymEigen eigM(proj);
-		charvec = eigM.get_evalues()[0];
+		TooN::SymEigen<TooN::Dynamic, double> eigM(*proj);
+		if (charvec)
+			delete charvec;
+		charvec = new TooN::Vector<-1, double>(2 * F);
+		*charvec = eigM.get_evectors()[0];
 	}
 }

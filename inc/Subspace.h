@@ -5,13 +5,13 @@
 /// \author	S. Sundaram
 //===========================================================================
 
-#ifndef SUBSPACE_H_
-#define SUBSPACE_H_
-
 #include <sysdef.h>
 #include <TooN/TooN.h>
 #include <opencv/cxcore.h>
 #include <opencv/highgui.h>
+
+#ifndef SUBSPACE_H_
+#define SUBSPACE_H_
 
 //=============================================================================
 /// Class that defines a subspace based on a projection matrix
@@ -29,11 +29,11 @@ public:
 
 private:
 
-	TooN::Matrix<-1, -1, double> proj;
-	TooN::Vector<-1, double> charvec;
+	TooN::Matrix<-1, -1, double> *proj;
+	TooN::Vector<-1, double> *charvec;
 
-	const int NUM_RANSAC_ITERATIONS = 16;
-	const double RANSAC_CONVERGENCE = 0.8;
+	static const int NUM_RANSAC_ITERATIONS = 16;
+	static const double RANSAC_CONVERGENCE = 0.8;
 };
 
 

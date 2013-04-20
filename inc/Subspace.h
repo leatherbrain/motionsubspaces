@@ -27,6 +27,12 @@ public:
 	// Extract motion subspace from a set of trajectories
 	void Extract(const cv::Mat &trjs);
 
+	// Accessor
+	const TooN::Vector<-1, double> &GetCharVec() const
+	{
+		return *charvec;
+	}
+
 private:
 
 	TooN::Matrix<-1, -1, double> *proj;

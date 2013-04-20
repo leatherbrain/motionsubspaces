@@ -54,7 +54,7 @@ LIBPATHS = -L../lib \
 	-L/usr/local/cvd/lib \
 	-L/usr/lib
 			
-LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video -lopencv_imgproc
+LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video -lopencv_imgproc -llapack
 
 OBJS = $(OBJDIR)Tracker.o \
 	$(OBJDIR)Subspace.o

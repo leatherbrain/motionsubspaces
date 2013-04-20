@@ -55,5 +55,12 @@ int main(int argc, char **argv)
 		t.Update(frame);
 	}
 
+	// Extract motion subspace
+	Subspace s;
+	cv::Mat trajMat;
+	t.GetTrjMatrix(30, trajMat);
+	s.Extract(trajMat);
+	std::cout << "Eigenvector: " << s.GetCharVec() << std::endl;
+
 	closedir(dp);
 }

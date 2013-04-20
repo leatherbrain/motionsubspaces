@@ -99,7 +99,7 @@ void Tracker::Update(const cv::Mat &frame)
 //=============================================================================
 /// Get trajectory matrix for n frames
 //=============================================================================
-bool Tracker::GetTrjMatrix(int n, cv::Mat & t)
+bool Tracker::GetTrjMatrix(int n, cv::Mat &t)
 {
 	// Get all possible trajectories
 	std::vector<Trajectory>::const_iterator trj = trjs.begin();

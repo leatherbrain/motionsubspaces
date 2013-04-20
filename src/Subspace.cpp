@@ -25,7 +25,10 @@ Subspace::Subspace(void) : proj(NULL), charvec(NULL)
 /// Standard destructor
 //=============================================================================
 Subspace::~Subspace(void)
-{}
+{
+	delete proj;
+	delete charvec;
+}
 
 //=============================================================================
 /// Extract projection matrix from a set of motion trajectories
@@ -38,8 +41,7 @@ void Subspace::Extract(const cv::Mat &trjs)
 	const int F = trjs.rows / 2;
 
 	// Allocate projection matrix
-	if (proj)
-		delete proj;
+	delete proj;
 	proj = new TooN::Matrix<-1, -1, double>(2 * F, 2 * F);
 
 	for (int iter = 0; iter < NUM_RANSAC_ITERATIONS; iter++)
@@ -87,8 +89,7 @@ void Subspace::Extract(const cv::Mat &trjs)
 	// Compute eigenvector of the projection matrix as the characteristic
 	// trajectory
 	TooN::SymEigen<TooN::Dynamic, double> eigM(*proj);
-	if (charvec)
-		delete charvec;
+	delete charvec;
 	charvec = new TooN::Vector<-1, double>(2 * F);
 	*charvec = eigM.get_evectors()[0];
 }

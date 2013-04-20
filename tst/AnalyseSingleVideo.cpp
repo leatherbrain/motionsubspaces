@@ -40,11 +40,19 @@ int main(int argc, char **argv)
 			filenames.insert(name);
 	}
 
+	// Process all images
+	Tracker t;
 	std::set<std::string>::const_iterator name = filenames.begin();
 	for (; name != filenames.end(); name++)
 	{
 		std::string pathToFile = path + "/" + *name;
 		std::cout << "Processing " << pathToFile << std::endl;
+
+		// Read file
+		cv::Mat frame = cv::imread(pathToFile.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+
+		// Update tracker
+		t.Update(frame);
 	}
 
 	closedir(dp);

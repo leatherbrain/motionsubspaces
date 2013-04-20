@@ -82,7 +82,7 @@ lib: $(OBJS)
 	
 tst: AnalyseSingleVideo
 
-AnalyseSingleVideo: $(TSTDIR)AnalyseSingleVideo.cpp $(TARGET).a
+AnalyseSingleVideo: $(TSTDIR)AnalyseSingleVideo.cpp ../inc/Undistort.h $(TARGET).a
 	g++ $(FLAGS_TST) -c $(TSTDIR)AnalyseSingleVideo.cpp $(INCLUDES) -o $(OBJDIR)AnalyseSingleVideo.o
 	g++ $(OBJDIR)AnalyseSingleVideo.o $(LIBPATHS) -o $(BINDIR)AnalyseSingleVideo -lsubspaces $(LIBS)
 

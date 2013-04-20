@@ -38,7 +38,7 @@ private:
 	TooN::Matrix<-1, -1, double> *proj;
 	TooN::Vector<-1, double> *charvec;
 
-	static const int NUM_RANSAC_ITERATIONS = 16;
+	static const int NUM_RANSAC_ITERATIONS = 160;
 	static const double RANSAC_CONVERGENCE = 0.8;
 };
 

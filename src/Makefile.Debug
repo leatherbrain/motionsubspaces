@@ -83,7 +83,7 @@ LIBPATHS = -L../lib/Debug \
 	-L/usr/lib \
 	-L/usr/local/boost/lib
 
-LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video 
+LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video -lopencv_imgproc -llapack 
 
 OBJS = $(OBJDIR)Tracker.o \
 	$(OBJDIR)Subspace.o 
@@ -111,9 +111,9 @@ lib: $(OBJS)
 	
 tst: AnalyseSingleVideo
 
-AnalyseSingleVideo: $(TSTDIR)AnalyseSingleVideo.cpp $(TARGET).a
+AnalyseSingleVideo: $(TSTDIR)AnalyseSingleVideo.cpp ../inc/Undistort.h $(TARGET).a
 	g++ $(FLAGS_TST) -c $(TSTDIR)AnalyseSingleVideo.cpp $(INCLUDES) -o $(OBJDIR)AnalyseSingleVideo.o
-	g++ $(OBJDIR)AnalyseSingleVideo.o $(LIBPATHS) $(LIBS) -o $(BINDIR)AnalyseSingleVideo_d 
+	g++ $(OBJDIR)AnalyseSingleVideo.o $(LIBPATHS) -o $(BINDIR)AnalyseSingleVideo_d -lsubspaces_d $(LIBS)
 
 clean:
 	rm -f $(OBJDIR)*.o $(OBJDIR)*.gcno $(TSTDIR)*.o $(TARGET) $(OBJDIR)*.so*

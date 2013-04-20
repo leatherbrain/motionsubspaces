@@ -32,11 +32,16 @@ Subspace::~Subspace(void)
 //=============================================================================
 void Subspace::Extract(const cv::Mat &trjs)
 {
-	// Run ransac
-	int maxInliers = 0;
+	// Parameter initialisation
+	double errmin = std::numeric_limits<double>::max();
 	const int P = trjs.cols;
 	const int F = trjs.rows / 2;
-	const int convergence = RANSAC_CONVERGENCE * P;
+
+	// Allocate projection matrix
+	if (proj)
+		delete proj;
+	proj = new TooN::Matrix<-1, -1, double>(2 * F, 2 * F);
+
 	for (int iter = 0; iter < NUM_RANSAC_ITERATIONS; iter++)
 	{
 		// Pick three basis trajectories at random
@@ -53,17 +58,37 @@ void Subspace::Extract(const cv::Mat &trjs)
 
 		// Compute the projection matrix corresponding to these trajectories
 		TooN::LU<> lu(W3.T() * W3);
-		if (proj)
-			delete proj;
-		proj = new TooN::Matrix<-1, -1, double>(2 * F, 2 * F);
-		*proj = W3 * lu.get_inverse() * W3.T();
+		TooN::Matrix<-1, -1, double> proj_i(W3 * lu.get_inverse() * W3.T());
 
-		// Compute eigenvector of the projection matrix as the characteristic
-		// trajectory
-		TooN::SymEigen<TooN::Dynamic, double> eigM(*proj);
-		if (charvec)
-			delete charvec;
-		charvec = new TooN::Vector<-1, double>(2 * F);
-		*charvec = eigM.get_evectors()[0];
+		// Compute the re-projection error
+		double err = 0;
+		for (int c = 0; c < trjs.cols; c++)
+		{
+			TooN::Vector<-1, double> t(trjs.rows);
+			for (int r = 0; r < trjs.rows; r++)
+				t[r] = trjs.at<float>(r, c);
+
+			TooN::Vector<-1, double> t_err((proj_i * t) - t);
+			double err_i = 0;
+			for (int i = 0; i < trjs.rows; i++)
+				err_i += t_err[i] * t_err[i];
+
+			err += sqrt(err_i);
+		}
+
+		// Check for min error
+		if (err < errmin)
+		{
+			errmin = err;
+			*proj = proj_i;
+		}
 	}
+
+	// Compute eigenvector of the projection matrix as the characteristic
+	// trajectory
+	TooN::SymEigen<TooN::Dynamic, double> eigM(*proj);
+	if (charvec)
+		delete charvec;
+	charvec = new TooN::Vector<-1, double>(2 * F);
+	*charvec = eigM.get_evectors()[0];
 }

@@ -43,7 +43,6 @@ void Tracker::Update(const cv::Mat &frame)
 
 		// Update processed frame
 		frame.copyTo(pFrame);
-
 		return;
 	}
 
@@ -51,8 +50,7 @@ void Tracker::Update(const cv::Mat &frame)
 	std::vector<cv::Point2f> trackedPoints;
 	std::vector<unsigned char> status;
 	std::vector<float> err;
-	cv::calcOpticalFlowPyrLK(pFrame, frame, keypoints, trackedPoints, status,
-			err);
+	cv::calcOpticalFlowPyrLK(pFrame, frame, keypoints, trackedPoints, status, err);
 
 	// Mask out tracked points to calculate new features to track
 	cv::Mat mask = cv::Mat::ones(frame.rows, frame.cols, CV_8UC1);
@@ -94,6 +92,9 @@ void Tracker::Update(const cv::Mat &frame)
 			newPoints.pop_back();
 		}
 	}
+
+	// Update processed frame
+	frame.copyTo(pFrame);
 }
 
 //=============================================================================
@@ -125,10 +126,10 @@ bool Tracker::GetTrjMatrix(int n, cv::Mat & t)
 
 		// Copy
 		std::vector<cv::Point2f>::const_iterator p = pt.begin();
-		for (int f = 0; f < 2 * n; f += 2, p++)
+		for (int f = 2 * n - 1; f >= 0; f -= 2, p++)
 		{
-			t.at<float>(f, i) = p->x;
-			t.at<float>(f + 1, i) = p->y;
+			t.at<float>(f, i) = p->y;
+			t.at<float>(f - 1, i) = p->x;
 		}
 	}
 

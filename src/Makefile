@@ -9,6 +9,7 @@
 
 OBJDIR = ./../lib/
 TSTDIR = ./../tst/
+BINDIR = ./../bin/
 
 CXX = colorgcc
 CXX_GPP34 = g++34
@@ -53,7 +54,7 @@ LIBPATHS = -L../lib \
 	-L/usr/local/cvd/lib \
 	-L/usr/lib \
 			
-LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video 
+LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video
 
 OBJS = $(OBJDIR)Tracker.o \
 	$(OBJDIR)Subspace.o
@@ -79,7 +80,11 @@ lib: $(OBJS)
 	ln -s $(TARGET).so.1.0.0 $(TARGET).so.1
 	ln -s $(TARGET).so.1.0.0 $(TARGET).so
 	
-tst:
+tst: AnalyseSingleVideo
+
+AnalyseSingleVideo: $(TSTDIR)AnalyseSingleVideo.cpp $(TARGET).a
+	g++ $(FLAGS_TST) -c $(TSTDIR)AnalyseSingleVideo.cpp $(INCLUDES) -o $(OBJDIR)AnalyseSingleVideo.o
+	g++ $(OBJDIR)AnalyseSingleVideo.o $(LIBPATHS) $(LIBS) -o $(BINDIR)AnalyseSingleVideo
 
 clean:
 	rm -f $(OBJDIR)*.o $(OBJDIR)*.gcno $(TSTDIR)*.o $(TARGET)

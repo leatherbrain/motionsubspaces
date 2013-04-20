@@ -9,6 +9,7 @@
 
 OBJDIR = ./../lib/Debug/
 TSTDIR = ./../tst/
+BINDIR = ./../bin/
 
 CXX = colorgcc
 CXX_GPP34 = g++34
@@ -108,7 +109,11 @@ lib: $(OBJS)
 	ln -s $(TARGET).so.1.0.0 $(TARGET).so.1
 	ln -s $(TARGET).so.1.0.0 $(TARGET).so
 	
-tst: 
+tst: AnalyseSingleVideo
+
+AnalyseSingleVideo: $(TSTDIR)AnalyseSingleVideo.cpp $(TARGET).a
+	g++ $(FLAGS_TST) -c $(TSTDIR)AnalyseSingleVideo.cpp $(INCLUDES) -o $(OBJDIR)AnalyseSingleVideo.o
+	g++ $(OBJDIR)AnalyseSingleVideo.o $(LIBPATHS) $(LIBS) -o $(BINDIR)AnalyseSingleVideo_d 
 
 clean:
 	rm -f $(OBJDIR)*.o $(OBJDIR)*.gcno $(TSTDIR)*.o $(TARGET) $(OBJDIR)*.so*

@@ -32,6 +32,9 @@ public:
 	// Get trajectory matrix for a specified number of frames
 	bool GetTrjMatrix(int n, cv::Mat &t);
 
+	// Visualise trajectories
+	void Visualise();
+
 private:
 
 	/// Processed frame
@@ -91,6 +94,10 @@ private:
 		Trajectory()
 		{}
 	};
+
+	// Visualise tracked keypoints
+	void VisualiseTracking(const std::vector<cv::Point2f> &f1,
+						   const std::vector<cv::Point2f> &f2);
 
 	/// Trajectories of feature points
 	std::vector<Trajectory> trjs;

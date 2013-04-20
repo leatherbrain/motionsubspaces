@@ -77,23 +77,32 @@ void Tracker::Update(const cv::Mat &frame)
 		}
 	}
 
+	// Update keypoints
+	keypoints = trackedPoints;
+
 	// Get new features to track
 	std::vector<cv::Point2f> newPoints;
 	cv::goodFeaturesToTrack(frame, newPoints, NUM_FEATURES_PER_FRAME - numKilled, 0.01, 5.0, mask);
 
 	// Create new trajectories with the new feature points
 	std::vector<Trajectory>::iterator t = trjs.begin();
-	for (; t != trjs.end() && !newPoints.empty(); t++)
+	int count = 0;
+	for (; t != trjs.end() && !newPoints.empty(); t++, count++)
 	{
 		if (!t->IsAlive())
 		{
 			*t = Trajectory(newPoints.back());
+			keypoints.at(count) = newPoints.back();
 			newPoints.pop_back();
 		}
 	}
 
 	// Update processed frame
 	frame.copyTo(pFrame);
+
+//	VisualiseTracking(keypoints, trackedPoints);
+//	Visualise();
+//	sleep(2);
 }
 
 //=============================================================================
@@ -135,3 +144,51 @@ bool Tracker::GetTrjMatrix(int n, cv::Mat &t)
 	return true;
 }
 
+//=============================================================================
+/// Visualise all point trajectories
+//=============================================================================
+void Tracker::Visualise()
+{
+	// Create a copy of the processed frame
+	cv::Mat img;
+	pFrame.copyTo(img);
+	cvtColor(img, img, CV_GRAY2BGR);
+
+	// Go through all trajectories and mark the points
+	std::vector<Trajectory>::const_iterator t = trjs.begin();
+	for (; t != trjs.end(); t++)
+	{
+		std::vector<cv::Point2f>::const_reverse_iterator p = t->trj.rbegin();
+		cv::circle(img, *p, 2, cv::Scalar(CV_RGB(255, 0, 0)), 1);
+		p++;
+		for (; p != t->trj.rend(); p++)
+			cv::line(img, *(p - 1), *p, cv::Scalar(CV_RGB(0, 255, 0)), 1);
+	}
+
+	cv::imwrite("traj.png", img);
+}
+
+//=============================================================================
+/// Visualise point tracking
+//=============================================================================
+void Tracker::VisualiseTracking(const std::vector<cv::Point2f> & f1,
+								const std::vector<cv::Point2f> & f2)
+{
+	// Create a copy of the processed frame
+	cv::Mat img;
+	pFrame.copyTo(img);
+	cvtColor(img, img, CV_GRAY2BGR);
+
+	// Go through all pairs of points and draw
+	std::vector<cv::Point2f>::const_iterator f1p, f2p;
+	for (f1p = f1.begin(), f2p = f2.begin();
+		 f1p != f1.end() && f2p != f2.end();
+		 f1p++, f2p++)
+	{
+		cv::circle(img, *f1p, 2, cv::Scalar(CV_RGB(255, 0, 0)), 1);
+		cv::circle(img, *f2p, 2, cv::Scalar(CV_RGB(0, 255, 0)), 1);
+		cv::line(img, *f1p, *f2p, cv::Scalar(CV_RGB(0, 255, 0)), 1);
+	}
+
+	cv::imwrite("tracking.png", img);
+}

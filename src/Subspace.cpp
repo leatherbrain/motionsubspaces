@@ -92,4 +92,6 @@ void Subspace::Extract(const cv::Mat &trjs)
 	delete charvec;
 	charvec = new TooN::Vector<-1, double>(2 * F);
 	*charvec = eigM.get_evectors()[0];
+
+	std::cout << "Eigenvalues: " << eigM.get_evalues() << std::endl;
 }

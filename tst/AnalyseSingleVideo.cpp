@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 	// Extract motion subspace
 	Subspace s;
 	cv::Mat trajMat;
-	t.GetTrjMatrix(30, trajMat);
+	t.GetTrjMatrix(filenames.size() - 5, trajMat);
 	s.Extract(trajMat);
 	std::cout << "Eigenvector: " << s.GetCharVec() << std::endl;
 

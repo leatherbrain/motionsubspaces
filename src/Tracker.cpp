@@ -79,8 +79,7 @@ void Tracker::Update(const cv::Mat &frame)
 
 	// Get new features to track
 	std::vector<cv::Point2f> newPoints;
-	cv::goodFeaturesToTrack(frame, newPoints,
-			NUM_FEATURES_PER_FRAME - numKilled, 0.01, 5.0, mask);
+	cv::goodFeaturesToTrack(frame, newPoints, NUM_FEATURES_PER_FRAME - numKilled, 0.01, 5.0, mask);
 
 	// Create new trajectories with the new feature points
 	std::vector<Trajectory>::iterator t = trjs.begin();
@@ -125,7 +124,7 @@ bool Tracker::GetTrjMatrix(int n, cv::Mat & t)
 		const std::vector<cv::Point2f> &pt = trjs.at(*idx).GetTrj();
 
 		// Copy
-		std::vector<cv::Point2f>::const_iterator p = pt.begin();
+		std::vector<cv::Point2f>::const_reverse_iterator p = pt.rbegin();
 		for (int f = 2 * n - 1; f >= 0; f -= 2, p++)
 		{
 			t.at<float>(f, i) = p->y;

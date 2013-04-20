@@ -52,7 +52,7 @@ INCLUDES = -I../inc \
 LIBPATHS = -L../lib \
 	-L/usr/local/lib \
 	-L/usr/local/cvd/lib \
-	-L/usr/lib \
+	-L/usr/lib
 			
 LIBS = -lcvd -lopencv_core -lopencv_highgui -lopencv_video -lopencv_imgproc
 
@@ -84,7 +84,7 @@ tst: AnalyseSingleVideo
 
 AnalyseSingleVideo: $(TSTDIR)AnalyseSingleVideo.cpp $(TARGET).a
 	g++ $(FLAGS_TST) -c $(TSTDIR)AnalyseSingleVideo.cpp $(INCLUDES) -o $(OBJDIR)AnalyseSingleVideo.o
-	g++ $(OBJDIR)AnalyseSingleVideo.o $(LIBPATHS) $(LIBS) -lsubspaces -o $(BINDIR)AnalyseSingleVideo
+	g++ $(OBJDIR)AnalyseSingleVideo.o $(LIBPATHS) -o $(BINDIR)AnalyseSingleVideo -lsubspaces $(LIBS)
 
 clean:
 	rm -f $(OBJDIR)*.o $(OBJDIR)*.gcno $(TSTDIR)*.o $(TARGET)

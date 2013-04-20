@@ -49,7 +49,7 @@ void Subspace::Extract(const cv::Mat &trjs)
 		std::set<int>::const_iterator p = unique.begin();
 		for (int c = 0; p != unique.end(); p++, c++)
 			for (int r = 0; r < trjs.rows; r++)
-				W3(r, c) = trjs.at<double>(r, *p);
+				W3(r, c) = trjs.at<float>(r, *p);
 
 		// Compute the projection matrix corresponding to these trajectories
 		TooN::LU<> lu(W3.T() * W3);

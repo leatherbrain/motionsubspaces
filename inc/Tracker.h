@@ -29,6 +29,9 @@ public:
 	// Track features in given frame using sparse optical flow
 	void Update(const cv::Mat &frame);
 
+	// Get trajectory matrix for a specified number of frames
+	bool GetTrjMatrix(int n, cv::Mat &t);
+
 private:
 
 	/// Processed frame
@@ -77,27 +80,9 @@ private:
 		}
 
 		// Convert trajectory to Mat
-		void GetTrj(cv::Mat &t) const
+		const std::vector<cv::Point2f> &GetTrj() const
 		{
-			// Check sizes
-			if (t.cols != 1)
-			{
-				std::cerr << "Expected a column matrix" << std::endl;
-				throw std::exception();
-			}
-			if (t.rows > (int)trj.size() * 2)
-			{
-				std::cerr << "Trajectory not long enough" << std::endl;
-				throw std::exception();
-			}
-
-			// Copy coordinates
-			std::vector<cv::Point2f>::const_reverse_iterator p = trj.rbegin();
-			for (int i = t.rows - 1; i >= 0; i -= 2, p++)
-			{
-				t.at<double>(i, 0) = p->y;
-				t.at<double>(i - 1, 0) = p->x;
-			}
+			return trj;
 		}
 
 	private:
@@ -112,6 +97,7 @@ private:
 
 	/// Settings
 	static const int NUM_FEATURES_PER_FRAME = 160;
+	static const int MIN_TRACKED_POINTS = 40;
 };
 
 #endif /* TRACKER_H_ */

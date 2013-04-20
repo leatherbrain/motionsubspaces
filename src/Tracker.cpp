@@ -33,7 +33,8 @@ void Tracker::Update(const cv::Mat &frame)
 	if (pFrame.rows == 0 || pFrame.cols == 0)
 	{
 		// Initialise good features to track
-		cv::goodFeaturesToTrack(frame, keypoints, NUM_FEATURES_PER_FRAME, 0.01, 5.0);
+		cv::goodFeaturesToTrack(frame, keypoints, NUM_FEATURES_PER_FRAME, 0.01,
+				5.0);
 
 		// Add all features to new trajectories
 		std::vector<cv::Point2f>::const_iterator p = keypoints.begin();
@@ -50,7 +51,8 @@ void Tracker::Update(const cv::Mat &frame)
 	std::vector<cv::Point2f> trackedPoints;
 	std::vector<unsigned char> status;
 	std::vector<float> err;
-	cv::calcOpticalFlowPyrLK(pFrame, frame, keypoints, trackedPoints, status, err);
+	cv::calcOpticalFlowPyrLK(pFrame, frame, keypoints, trackedPoints, status,
+			err);
 
 	// Mask out tracked points to calculate new features to track
 	cv::Mat mask = cv::Mat::ones(frame.rows, frame.cols, CV_8UC1);
@@ -67,8 +69,9 @@ void Tracker::Update(const cv::Mat &frame)
 			for (int y = p->y - 1; y <= p->y + 1; y++)
 				for (int x = p->x - 1; x <= p->x + 1; x++)
 					if (y > 0 && y < frame.rows && x > 0 && x < frame.cols)
-						mask.at<unsigned char>(y, x) = 0;
+						mask.at<unsigned char> (y, x) = 0;
 		}
+
 		else
 		{
 			trjs.at(idx).Kill();
@@ -78,7 +81,8 @@ void Tracker::Update(const cv::Mat &frame)
 
 	// Get new features to track
 	std::vector<cv::Point2f> newPoints;
-	cv::goodFeaturesToTrack(frame, newPoints, NUM_FEATURES_PER_FRAME - numKilled, 0.01, 5.0, mask);
+	cv::goodFeaturesToTrack(frame, newPoints,
+			NUM_FEATURES_PER_FRAME - numKilled, 0.01, 5.0, mask);
 
 	// Create new trajectories with the new feature points
 	std::vector<Trajectory>::iterator t = trjs.begin();
@@ -91,3 +95,43 @@ void Tracker::Update(const cv::Mat &frame)
 		}
 	}
 }
+
+//=============================================================================
+/// Get trajectory matrix for n frames
+//=============================================================================
+bool Tracker::GetTrjMatrix(int n, cv::Mat & t)
+{
+	// Get all possible trajectories
+	std::vector<Trajectory>::const_iterator trj = trjs.begin();
+	std::vector<int> tidx;
+	for (int i = 0; trj != trjs.end(); trj++, i++)
+		if (trj->IsAlive() && trj->Length() > n)
+			tidx.push_back(i);
+
+	// Make sure we have enough valid trajectories
+	if ((int)tidx.size() < MIN_TRACKED_POINTS)
+	{
+		std::cout << "Only found " << tidx.size() << " trajectories of length "
+				<< n << std::endl;
+		return false;
+	}
+
+	std::vector<int>::const_iterator idx = tidx.begin();
+	t = cv::Mat(2 * n, tidx.size(), CV_32F);
+	for (int i = 0; idx != tidx.end(); idx++, i++)
+	{
+		// Get trajectory
+		const std::vector<cv::Point2f> &pt = trjs.at(*idx).GetTrj();
+
+		// Copy
+		std::vector<cv::Point2f>::const_iterator p = pt.begin();
+		for (int f = 0; f < 2 * n; f += 2, p++)
+		{
+			t.at<float>(f, i) = p->x;
+			t.at<float>(f + 1, i) = p->y;
+		}
+	}
+
+	return true;
+}
+
